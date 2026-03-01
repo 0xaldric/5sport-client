@@ -5,7 +5,23 @@
     "clubs": "Tìm CLB",
     "groups": "Hội nhóm",
     "login": "Đăng nhập",
-    "register": "Đăng ký"
+    "register": "Đăng ký",
+    "profile": "Hồ sơ",
+    "logout": "Đăng xuất"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "or": "hoặc",
+    "googleSignIn": "Đăng nhập với Google",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "displayName": "Tên hiển thị",
+    "displayNamePlaceholder": "Nhập tên hiển thị",
+    "loginSuccess": "Đăng nhập thành công!",
+    "registerSuccess": "Đăng ký thành công! Vui lòng đăng nhập."
   },
   "hero": {
     "title": "STAY ON TRACK",

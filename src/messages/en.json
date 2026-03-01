@@ -5,7 +5,23 @@
     "clubs": "Clubs",
     "groups": "Groups",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "or": "or",
+    "googleSignIn": "Sign in with Google",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Enter display name",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful! Please log in."
   },
   "hero": {
     "title": "STAY ON TRACK",
