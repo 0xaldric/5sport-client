@@ -1,0 +1,72 @@
+{
+  "nav": {
+    "home": "Home",
+    "tournaments": "Tournaments",
+    "clubs": "Clubs",
+    "groups": "Groups",
+    "login": "Login",
+    "register": "Register"
+  },
+  "hero": {
+    "title": "STAY ON TRACK",
+    "subtitle": "Connect with the sports community, compete and grow with 5Sport",
+    "cta": "Explore Now",
+    "promoTitle": "PICKLEBALL",
+    "promoSubtitle": "Summer Tournament"
+  },
+  "tournaments": {
+    "title": "Explore Tournaments",
+    "all": "All",
+    "pickleball": "Pickleball",
+    "tableTennis": "Table Tennis",
+    "basketball": "Basketball",
+    "viewAll": "View All",
+    "register": "Register",
+    "date": "Date",
+    "location": "Location",
+    "participants": "Participants"
+  },
+  "whyJoin": {
+    "title": "Why Join 5Sport!",
+    "subtitle": "A platform connecting athletes, organizing tournaments and building a strong sports community",
+    "compete": {
+      "title": "Compete & Rank",
+      "description": "Join professional tournaments, track your achievements and ranking in the community"
+    },
+    "connect": {
+      "title": "Connect Athletes",
+      "description": "Find opponents, teammates and connect with the passionate sports community"
+    },
+    "discover": {
+      "title": "Discover Events",
+      "description": "Discover sports events, tournaments and rich activities near you"
+    }
+  },
+  "athletes": {
+    "title": "Top Athletes on 5Sport",
+    "subtitle": "The best athletes on the 5Sport platform",
+    "rating": "Rating",
+    "rank": "Rank"
+  },
+  "groups": {
+    "title": "Join Groups",
+    "subtitle": "Connect with sports groups near you",
+    "join": "Join Group",
+    "members": "members",
+    "viewAll": "View All"
+  },
+  "footer": {
+    "about": "About 5Sport",
+    "aboutDesc": "Vietnam's leading sports community connection platform",
+    "links": "Links",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© 2024 5Sport. All rights reserved."
+  },
+  "common": {
+    "language": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  }
+}

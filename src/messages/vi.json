@@ -1,0 +1,72 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "tournaments": "Tìm giải đấu",
+    "clubs": "Tìm CLB",
+    "groups": "Hội nhóm",
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+  "hero": {
+    "title": "STAY ON TRACK",
+    "subtitle": "Kết nối cộng đồng thể thao, thi đấu và phát triển cùng 5Sport",
+    "cta": "Khám phá ngay",
+    "promoTitle": "PICKLEBALL",
+    "promoSubtitle": "Giải đấu mùa hè"
+  },
+  "tournaments": {
+    "title": "Khám phá các giải đấu",
+    "all": "Tất cả",
+    "pickleball": "Pickleball",
+    "tableTennis": "Bóng bàn",
+    "basketball": "Bóng rổ",
+    "viewAll": "Xem tất cả",
+    "register": "Đăng ký",
+    "date": "Ngày",
+    "location": "Địa điểm",
+    "participants": "Người tham gia"
+  },
+  "whyJoin": {
+    "title": "Tại sao nên Tham gia 5Sport!",
+    "subtitle": "Nền tảng kết nối vận động viên, tổ chức giải đấu và xây dựng cộng đồng thể thao lớn mạnh",
+    "compete": {
+      "title": "Thi đấu & Xếp hạng",
+      "description": "Tham gia các giải đấu chuyên nghiệp, theo dõi thành tích và xếp hạng của bạn trong cộng đồng"
+    },
+    "connect": {
+      "title": "Kết nối vận động viên",
+      "description": "Tìm kiếm đối thủ, đồng đội và kết nối với cộng đồng thể thao đam mê"
+    },
+    "discover": {
+      "title": "Khám phá sự kiện",
+      "description": "Khám phá các sự kiện thể thao, giải đấu và hoạt động phong phú gần bạn"
+    }
+  },
+  "athletes": {
+    "title": "Top vận động viên trên 5Sport",
+    "subtitle": "Những vận động viên xuất sắc nhất trên nền tảng 5Sport",
+    "rating": "Điểm",
+    "rank": "Hạng"
+  },
+  "groups": {
+    "title": "Tham gia hội nhóm",
+    "subtitle": "Kết nối với các hội nhóm thể thao gần bạn",
+    "join": "Tham gia nhóm",
+    "members": "thành viên",
+    "viewAll": "Xem tất cả"
+  },
+  "footer": {
+    "about": "Về 5Sport",
+    "aboutDesc": "Nền tảng kết nối cộng đồng thể thao hàng đầu Việt Nam",
+    "links": "Liên kết",
+    "contact": "Liên hệ",
+    "terms": "Điều khoản sử dụng",
+    "privacy": "Chính sách bảo mật",
+    "copyright": "© 2024 5Sport. Tất cả quyền được bảo lưu."
+  },
+  "common": {
+    "language": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  }
+}
