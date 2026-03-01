@@ -46,15 +46,18 @@ export function MobileNav({ onOpenAuth, user, onSignOut }: MobileNavProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-white/20"
+          className="text-slate-600 hover:bg-slate-100"
         >
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[280px]">
         <SheetHeader>
-          <SheetTitle className="text-left text-xl font-extrabold text-primary">
-            5SPORT
+          <SheetTitle className="flex items-center gap-1.5 text-left">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+              <span className="text-xs font-extrabold text-white">5</span>
+            </div>
+            <span className="text-lg font-extrabold text-secondary">SPORT</span>
           </SheetTitle>
         </SheetHeader>
 
@@ -116,7 +119,7 @@ export function MobileNav({ onOpenAuth, user, onSignOut }: MobileNavProps) {
                 {t("login")}
               </Button>
               <Button
-                className="w-full bg-green-500 text-white hover:bg-green-600"
+                className="w-full bg-primary text-white hover:bg-primary/90"
                 onClick={() => onOpenAuth("register")}
               >
                 {t("register")}

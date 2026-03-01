@@ -13,21 +13,18 @@ export function GroupCard({ name, image, members }: GroupCardProps) {
   const t = useTranslations("groups");
 
   return (
-    <div className="min-w-[260px] flex-shrink-0 overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md">
-      {/* Image */}
+    <div className="min-w-[260px] flex-shrink-0 cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/50">
       <div className="relative aspect-[16/10] overflow-hidden">
         <Image
           src={image}
           alt={name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-500 hover:scale-105"
         />
       </div>
-
-      {/* Content */}
       <div className="p-4">
-        <h3 className="text-sm font-semibold text-foreground">{name}</h3>
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <h3 className="text-sm font-bold text-secondary">{name}</h3>
+        <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
           <Users className="h-3.5 w-3.5" />
           <span>
             {members} {t("members")}
@@ -35,7 +32,7 @@ export function GroupCard({ name, image, members }: GroupCardProps) {
         </div>
         <Button
           size="sm"
-          className="mt-3 w-full bg-green-500 text-xs font-semibold text-white hover:bg-green-600"
+          className="mt-3 w-full bg-accent text-xs font-bold text-white shadow-sm shadow-emerald-200 transition-all duration-200 hover:bg-emerald-600 hover:shadow-md hover:shadow-emerald-300"
         >
           {t("join")}
         </Button>

@@ -15,17 +15,25 @@ export function AthleteRow({
   sport,
   rating,
 }: AthleteRowProps) {
+  const isTop3 = rank <= 3;
+
   return (
-    <div className="flex items-center gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-accent/50">
+    <div className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-colors duration-200 hover:bg-slate-50">
       {/* Rank */}
-      <span className="w-6 text-center text-sm font-bold text-muted-foreground">
+      <span
+        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+          isTop3
+            ? "bg-primary text-white"
+            : "bg-slate-100 text-slate-500"
+        }`}
+      >
         {rank}
       </span>
 
       {/* Avatar */}
-      <Avatar className="h-10 w-10">
+      <Avatar className="h-10 w-10 ring-2 ring-slate-100">
         <AvatarImage src={avatar} alt={name} />
-        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-sm font-bold text-primary">
           {name
             .split(" ")
             .map((n) => n[0])
@@ -35,17 +43,17 @@ export function AthleteRow({
       </Avatar>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="truncate text-sm font-semibold text-foreground">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-secondary">
           {name}
         </p>
-        <p className="text-xs text-muted-foreground">{sport}</p>
+        <p className="text-xs text-slate-500">{sport}</p>
       </div>
 
       {/* Rating */}
-      <div className="flex items-center gap-1">
-        <span className="text-sm font-bold text-yellow-500">★</span>
-        <span className="text-sm font-semibold text-foreground">{rating}</span>
+      <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1">
+        <span className="text-sm text-amber-500">&#9733;</span>
+        <span className="text-sm font-bold text-amber-700">{rating}</span>
       </div>
     </div>
   );

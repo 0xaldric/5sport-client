@@ -64,9 +64,19 @@ pnpm generate:api     # Generate API hooks from Swagger (orval)
 - Use `"use client"` only for interactive components (hooks, events)
 - Import path alias: `@/` maps to `src/`
 
-### Styling
-- Primary color: `#0000FF` (blue) — `hsl(240 100% 50%)`
-- Success/CTA: `green-500` / `green-600`
+### Styling — Modern Sports Brand (Nike-inspired)
+- **Design style:** Vibrant, block-based, premium sports tech
+- **Primary:** `#2563EB` (Electric Blue) — `hsl(217 91% 53%)`
+- **Secondary:** `#0F172A` (Deep Navy) — for headers, footer, strong text
+- **Accent/CTA:** `#22C55E` (Neon Green) — highlights, join buttons (use sparingly)
+- **Background:** `#FFFFFF` white, sections use `#F1F5F9` (slate-50/muted)
+- **Text primary:** `#0B1220`, Text secondary: `#475569` (slate-500)
+- **Border:** `#E2E8F0` (slate-200)
+- **Header:** White/glass with backdrop-blur, NOT colored background
+- **Footer:** Deep Navy (`bg-secondary`) dark footer
+- **Cards:** White with border-slate-200, hover lift `-translate-y-1` + shadow
+- **Transitions:** 200-300ms for all interactive elements
+- **cursor-pointer** on all clickable elements
 - Max container width: `1440px` (`max-w-container`)
 - Use `cn()` from `@/lib/utils` for conditional classes
 

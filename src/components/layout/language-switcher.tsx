@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-white hover:bg-white/20 hover:text-white"
+          className="gap-1.5 text-slate-600 hover:bg-slate-100 hover:text-secondary"
         >
           <span className="text-base">{localeLabels[locale].flag}</span>
           <span className="text-sm font-medium">

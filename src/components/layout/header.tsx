@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, ChevronDown } from "lucide-react";
 import { LanguageSwitcher } from "./language-switcher";
 import { MobileNav } from "./mobile-nav";
 import { AuthModal } from "@/components/auth/auth-modal";
@@ -45,12 +45,15 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-primary shadow-lg">
-        <div className="mx-auto flex h-[72px] max-w-container items-center justify-between px-6 lg:px-20">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-container items-center justify-between px-6 lg:px-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-extrabold tracking-tight text-white">
-              5<span className="text-white">SPORT</span>
+          <Link href="/" className="flex items-center gap-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <span className="text-sm font-extrabold text-white">5</span>
+            </div>
+            <span className="text-lg font-extrabold tracking-tight text-secondary">
+              SPORT
             </span>
           </Link>
 
@@ -60,7 +63,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/15 hover:text-white"
+                className="rounded-lg px-3.5 py-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:bg-slate-100 hover:text-secondary"
               >
                 {item.label}
               </Link>
@@ -68,16 +71,16 @@ export function Header() {
           </nav>
 
           {/* Right Side */}
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             <LanguageSwitcher />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="gap-2 text-white hover:bg-white/20 hover:text-white"
+                    className="gap-2 text-slate-700 hover:bg-slate-100"
                   >
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-7 w-7">
                       <AvatarImage
                         src={
                           ("avatarUrl" in user
@@ -87,7 +90,7 @@ export function Header() {
                               : undefined) as string | undefined
                         }
                       />
-                      <AvatarFallback className="bg-white/20 text-xs font-bold text-white">
+                      <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
                         {(
                           ("displayName" in user
                             ? user.displayName
@@ -99,22 +102,23 @@ export function Header() {
                           .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="max-w-[120px] truncate text-sm">
+                    <span className="max-w-[100px] truncate text-sm font-medium">
                       {("displayName" in user
                         ? user.displayName
                         : "name" in user
                           ? user.name
                           : user.email) ?? "User"}
                     </span>
+                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     {t("profile")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
                     <LogOut className="mr-2 h-4 w-4" />
                     {t("logout")}
                   </DropdownMenuItem>
@@ -125,14 +129,14 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/20 hover:text-white"
+                  className="text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-secondary"
                   onClick={() => openAuth("login")}
                 >
                   {t("login")}
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-green-500 font-semibold text-white hover:bg-green-600"
+                  className="bg-primary text-sm font-semibold text-white shadow-sm shadow-primary/25 transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/30"
                   onClick={() => openAuth("register")}
                 >
                   {t("register")}
