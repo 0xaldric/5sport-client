@@ -1,7 +1,7 @@
 services:
   5sport-client:
-    image: ${DOCKERHUB_USERNAME}/5sport-client:${IMAGE_TAG:-latest}
-    container_name: 5sport-client
+    image: ${DOCKERHUB_USERNAME}/5sport-client:dev
+    container_name: 5sport-client-dev
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
@@ -12,4 +12,4 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     env_file:
-      - .env
+      - .env.dev

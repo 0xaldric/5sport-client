@@ -2,7 +2,7 @@ name: Build & Push Docker Image
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 env:
@@ -11,6 +11,12 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    # Uses GitHub Environment to pick the right NEXT_PUBLIC_API_URL per branch
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+
+    env:
+      ENV_SUFFIX: ${{ github.ref_name == 'main' && 'latest' || 'dev' }}
 
     steps:
       - name: Checkout
@@ -31,8 +37,8 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=${{ env.ENV_SUFFIX }}
             type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -42,6 +48,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
