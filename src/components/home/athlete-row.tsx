@@ -42,7 +42,6 @@ export function AthleteRow({
         </AvatarFallback>
       </Avatar>
 
-  /* Info */
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-secondary">
           {name}
@@ -50,7 +49,6 @@ export function AthleteRow({
         <p className="text-xs text-slate-500">{sport}</p>
       </div>
 
-      /* Rating */
       <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1">
         <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
         <span className="text-sm font-bold text-amber-700">{rating}</span>
