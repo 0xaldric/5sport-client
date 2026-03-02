@@ -78,7 +78,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="gap-2 text-white hover:bg-white/10"
+                    className="gap-2 text-white hover:bg-accent/90  hover:text-secondary"
                   >
                     <Avatar className="h-7 w-7">
                       <AvatarImage
@@ -113,9 +113,11 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    {t("profile")}
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      {t("profile")}
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
