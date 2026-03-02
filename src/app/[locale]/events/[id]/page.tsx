@@ -194,12 +194,14 @@ export default function EventDetailPage({
                 <Share2 className="mr-2 h-4 w-4" />
                 {t("share")}
               </Button>
-              <Button
-                size="sm"
-                className="bg-primary font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90"
-              >
-                {t("register")}
-              </Button>
+              <Link href={`/events/${id}/register`}>
+                <Button
+                  size="sm"
+                  className="bg-primary font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90"
+                >
+                  {t("register")}
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -299,9 +301,11 @@ export default function EventDetailPage({
               )}
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <Button className="w-full bg-primary py-6 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30">
-                  {t("register")}
-                </Button>
+                <Link href={`/events/${id}/register`} className="block">
+                  <Button className="w-full bg-primary py-6 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30">
+                    {t("register")}
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -371,9 +375,11 @@ export default function EventDetailPage({
                   </div>
                   <p className="font-semibold text-secondary">Chưa có người tham gia</p>
                   <p className="text-xs text-slate-400">Hãy là người đầu tiên đăng ký!</p>
-                  <Button className="mt-2 bg-primary font-bold text-white hover:bg-primary/90">
-                    {t("register")}
-                  </Button>
+                  <Link href={`/events/${id}/register`}>
+                    <Button className="mt-2 bg-primary font-bold text-white hover:bg-primary/90">
+                      {t("register")}
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
