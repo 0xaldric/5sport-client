@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { useCampaignControllerFindBySlug } from "@/lib/services/campaigns/campaigns";
 import { useCampaignOrderControllerCreate } from "@/lib/services/campaign-orders/campaign-orders";
 import { useProvinceControllerListProvinces } from "@/lib/services/provinces/provinces";
+import { AXIOS_INSTANCE } from "@/lib/api/axiosInstance";
 import { AthleteInfoDtoSizeShirt } from "@/lib/schemas/athleteInfoDtoSizeShirt";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +33,6 @@ import {
   Plus,
   Trash2,
   Loader2,
-  CheckCircle2,
   ChevronDown,
   Receipt,
 } from "lucide-react";
@@ -119,7 +119,6 @@ export default function CampaignDetailPage() {
   const [athletes, setAthletes] = useState<AthleteForm[]>([
     { ...emptyAthlete },
   ]);
-  const [orderSuccess, setOrderSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const addAthlete = () => {
@@ -159,8 +158,11 @@ export default function CampaignDetailPage() {
   const handleConfirmOrder = async () => {
     if (!isFormValid || !campaign?.id) return;
 
+    // Step 1: Create order → get orderCode
+    let orderCode: string;
     try {
-      await createOrder.mutateAsync({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = (await createOrder.mutateAsync({
         campaignId: campaign.id,
         data: {
           lastName,
@@ -192,10 +194,45 @@ export default function CampaignDetailPage() {
             })
           ),
         },
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      })) as any;
+
+      orderCode = res?.orderCode;
+      if (!orderCode) throw new Error("Missing orderCode in response");
+    } catch {
       setShowConfirmModal(false);
-      setOrderSuccess(true);
-      toast.success(t("orderSuccess"));
+      toast.error(t("orderError"));
+      return;
+    }
+
+    // Step 2: Init SePay payment → get checkoutUrl + formFields
+    try {
+      const sepayRes = await AXIOS_INSTANCE.post<{
+        checkoutUrl: string;
+        formFields?: Record<string, string>;
+      }>(
+        `/campaigns/${campaign.id}/orders/${orderCode}/sepay/init`,
+        { paymentMethod: "BANK_TRANSFER" }
+      );
+
+      const { checkoutUrl, formFields } = sepayRes.data;
+
+      // Step 3: Redirect via hidden form POST
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = checkoutUrl;
+      form.style.display = "none";
+      if (formFields) {
+        Object.entries(formFields).forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        });
+      }
+      document.body.appendChild(form);
+      form.submit();
     } catch {
       toast.error(t("orderError"));
     }
@@ -239,26 +276,6 @@ export default function CampaignDetailPage() {
           <Ticket className="mb-4 h-16 w-16 text-muted-foreground/40" />
           <h3 className="mb-4 text-lg font-semibold">{t("noCampaigns")}</h3>
           <Link href="/group-tickets">
-            <Button variant="outline" className="cursor-pointer gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              {t("backToList")}
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Success state
-  if (orderSuccess) {
-    return (
-      <div className="mx-auto max-w-container px-6 py-12 lg:px-20">
-        <div className="flex flex-col items-center justify-center py-20">
-          <CheckCircle2 className="mb-4 h-16 w-16 text-green-500" />
-          <h3 className="mb-2 text-2xl font-bold text-foreground">
-            {t("orderSuccess")}
-          </h3>
-          <Link href="/group-tickets" className="mt-6">
             <Button variant="outline" className="cursor-pointer gap-2">
               <ArrowLeft className="h-4 w-4" />
               {t("backToList")}
