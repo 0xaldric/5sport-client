@@ -14,6 +14,7 @@ export * from './athleteControllerFindAllSportType';
 export * from './athleteControllerGetStatsParams';
 export * from './athleteControllerSearchParams';
 export * from './athleteInfoDto';
+export * from './athleteInfoDtoGender';
 export * from './athleteInfoDtoSizeShirt';
 export * from './athleteSportType';
 export * from './athleteStats';

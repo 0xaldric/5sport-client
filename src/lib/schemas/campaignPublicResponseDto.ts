@@ -39,6 +39,8 @@ export interface CampaignPublicResponseDto {
   regulationsUrl?: string;
   /** Link fanpage */
   fanpageUrl?: string;
+  /** Danh sách size áo */
+  sizeShirtOptions?: string[];
   /** Thời gian tạo */
   createdAt: string;
   /** Thời gian cập nhật */

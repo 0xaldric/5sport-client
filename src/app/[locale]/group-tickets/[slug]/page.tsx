@@ -8,7 +8,7 @@ import { useCampaignControllerFindBySlug } from "@/lib/services/campaigns/campai
 import { useCampaignOrderControllerCreate } from "@/lib/services/campaign-orders/campaign-orders";
 import { useProvinceControllerListProvinces } from "@/lib/services/provinces/provinces";
 import { AXIOS_INSTANCE } from "@/lib/api/axiosInstance";
-import { AthleteInfoDtoSizeShirt } from "@/lib/schemas/athleteInfoDtoSizeShirt";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,12 +47,31 @@ import type { AthleteInfoDto } from "@/lib/schemas/athleteInfoDto";
 
 const BLOOD_TYPES = ["A", "B", "AB", "O"] as const;
 
-const SHIRT_SIZES = Object.values(AthleteInfoDtoSizeShirt);
+const COUNTRIES = [
+  { code: "VN", name: "Việt Nam", flag: "🇻🇳" },
+  { code: "US", name: "United States", flag: "🇺🇸" },
+  { code: "CN", name: "China", flag: "🇨🇳" },
+  { code: "JP", name: "Japan", flag: "🇯🇵" },
+  { code: "KR", name: "South Korea", flag: "🇰🇷" },
+  { code: "TH", name: "Thailand", flag: "🇹🇭" },
+  { code: "SG", name: "Singapore", flag: "🇸🇬" },
+  { code: "MY", name: "Malaysia", flag: "🇲🇾" },
+  { code: "PH", name: "Philippines", flag: "🇵🇭" },
+  { code: "ID", name: "Indonesia", flag: "🇮🇩" },
+  { code: "AU", name: "Australia", flag: "🇦🇺" },
+  { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+  { code: "FR", name: "France", flag: "🇫🇷" },
+  { code: "DE", name: "Germany", flag: "🇩🇪" },
+  { code: "CA", name: "Canada", flag: "🇨🇦" },
+] as const;
 
 interface AthleteForm {
   lastName: string;
   firstName: string;
   phoneNumber: string;
+  email: string;
+  identityCard: string;
+  gender: string;
   location: string;
   national: string;
   provinceCode: string;
@@ -72,8 +91,11 @@ const emptyAthlete: AthleteForm = {
   lastName: "",
   firstName: "",
   phoneNumber: "",
+  email: "",
+  identityCard: "",
+  gender: "",
   location: "",
-  national: "",
+  national: "VN",
   provinceCode: "",
   dateOfBirth: "",
   sizeShirt: "",
@@ -94,6 +116,8 @@ const selectClass =
   "w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-8 text-sm outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 const labelClass = "mb-1 block text-xs font-medium text-muted-foreground";
+
+const noteClass = "mt-1 text-xs italic text-muted-foreground/80";
 
 export default function CampaignDetailPage() {
   const params = useParams();
@@ -148,16 +172,30 @@ export default function CampaignDetailPage() {
     );
   };
 
+  // sizeShirtOptions from API
+  const sizeShirtOptions: string[] = campaign?.sizeShirtOptions ?? [];
+
   const isFormValid =
     lastName.trim() &&
     firstName.trim() &&
     phoneNumber.trim() &&
+    email.trim() &&
+    email.includes("@") &&
     athletes.every(
       (a) =>
         a.distance &&
         a.lastName.trim() &&
         a.firstName.trim() &&
-        a.phoneNumber.trim()
+        a.phoneNumber.trim() &&
+        a.email.trim() &&
+        a.email.includes("@") &&
+        a.identityCard.trim() &&
+        a.dateOfBirth.trim() &&
+        a.gender &&
+        a.sizeShirt &&
+        a.national &&
+        a.medicalInformationName.trim() &&
+        a.medicalInformationPhoneNumber.trim()
     );
 
   const handleClickSubmit = () => {
@@ -186,6 +224,10 @@ export default function CampaignDetailPage() {
               lastName: a.lastName,
               firstName: a.firstName,
               phoneNumber: a.phoneNumber,
+              email: a.email,
+              identityCard: a.identityCard || undefined,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              gender: (a.gender as any) || undefined,
               location: a.location || undefined,
               national: a.national || undefined,
               provinceCode: a.provinceCode || undefined,
@@ -446,7 +488,7 @@ export default function CampaignDetailPage() {
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelClass}>{t("lastName")} *</label>
+                <label className={labelClass}>{t("lastName")} <span className="text-red-500">*</span> </label>
                 <input
                   type="text"
                   value={lastName}
@@ -456,7 +498,7 @@ export default function CampaignDetailPage() {
                 />
               </div>
               <div>
-                <label className={labelClass}>{t("firstName")} *</label>
+                <label className={labelClass}>{t("firstName")} <span className="text-red-500">*</span> </label>
                 <input
                   type="text"
                   value={firstName}
@@ -466,16 +508,17 @@ export default function CampaignDetailPage() {
                 />
               </div>
               <div>
-                <label className={labelClass}>{t("email")}</label>
+                <label className={labelClass}>{t("email")} <span className="text-red-500">*</span> </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
+                  required
                 />
               </div>
               <div>
-                <label className={labelClass}>{t("phoneNumber")} *</label>
+                <label className={labelClass}>{t("phoneNumber")} <span className="text-red-500">*</span> </label>
                 <input
                   type="tel"
                   value={phoneNumber}
@@ -534,7 +577,7 @@ export default function CampaignDetailPage() {
                     {/* Distance selection */}
                     <div className="relative sm:col-span-2 lg:col-span-3">
                       <label className={labelClass}>
-                        {t("runnerDistance")} *
+                        {t("runnerDistance")} <span className="text-red-500">*</span>
                       </label>
                       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                         {distances.map((item) => (
@@ -544,11 +587,10 @@ export default function CampaignDetailPage() {
                             onClick={() =>
                               updateAthlete(index, "distance", item.distance)
                             }
-                            className={`w-full cursor-pointer rounded-lg border px-3 py-2 text-left text-sm transition-all duration-200 ${
-                              athlete.distance === item.distance
-                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                                : "border-slate-200 hover:border-primary/40 hover:bg-slate-50"
-                            }`}
+                            className={`w-full cursor-pointer rounded-lg border px-3 py-2 text-left text-sm transition-all duration-200 ${athlete.distance === item.distance
+                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              : "border-slate-200 hover:border-primary/40 hover:bg-slate-50"
+                              }`}
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-foreground">
@@ -563,10 +605,17 @@ export default function CampaignDetailPage() {
                       </div>
                     </div>
 
-                    {/* Required fields */}
+                    {/* Thông tin vận động viên */}
+                    <div className="sm:col-span-2 lg:col-span-3">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Thông tin vận động viên
+                      </p>
+                    </div>
+
+                    {/* Name fields */}
                     <div>
                       <label className={labelClass}>
-                        {t("runnerLastName")} *
+                        {t("runnerLastName")} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -575,12 +624,13 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "lastName", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="Nguyễn Văn"
                         required
                       />
                     </div>
                     <div>
                       <label className={labelClass}>
-                        {t("runnerFirstName")} *
+                        {t("runnerFirstName")} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -589,12 +639,15 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "firstName", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="An"
                         required
                       />
                     </div>
+
+                    {/* Phone */}
                     <div>
                       <label className={labelClass}>
-                        {t("runnerPhone")} *
+                        {t("runnerPhone")} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
@@ -603,14 +656,52 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "phoneNumber", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="0901234567"
                         required
                       />
+                      <p className={noteClass}>Vui lòng nhập đúng số điện thoại để nhận thông báo từ BTC</p>
                     </div>
 
-                    {/* Personal info */}
+                    {/* Email */}
                     <div>
                       <label className={labelClass}>
-                        {t("runnerDateOfBirth")}
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={athlete.email}
+                        onChange={(e) =>
+                          updateAthlete(index, "email", e.target.value)
+                        }
+                        className={inputClass}
+                        placeholder="example@email.com"
+                        required
+                      />
+                      <p className={noteClass}>Vé sẽ được chuyển về tài khoản ứng với email</p>
+                    </div>
+
+                    {/* Identity Card */}
+                    <div>
+                      <label className={labelClass}>
+                        CCCD / Hộ chiếu <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={athlete.identityCard}
+                        onChange={(e) =>
+                          updateAthlete(index, "identityCard", e.target.value)
+                        }
+                        className={inputClass}
+                        placeholder="021234567890"
+                        required
+                      />
+                      <p className={noteClass}>Trường hợp vận động viên chưa có CCCD có thể điền CCCD của người giám hộ hoặc giấy khai sinh</p>
+                    </div>
+
+                    {/* Date of Birth */}
+                    <div>
+                      <label className={labelClass}>
+                        {t("runnerDateOfBirth")} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
@@ -619,21 +710,77 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "dateOfBirth", e.target.value)
                         }
                         className={inputClass}
+                        required
                       />
                     </div>
-                    <div>
+
+                    {/* Gender */}
+                    <div className="relative">
                       <label className={labelClass}>
-                        {t("runnerNational")}
+                        Giới tính <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
+                      <select
+                        value={athlete.gender}
+                        onChange={(e) =>
+                          updateAthlete(index, "gender", e.target.value)
+                        }
+                        className={selectClass}
+                        required
+                      >
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="MALE">Nam</option>
+                        <option value="FEMALE">Nữ</option>
+                        <option value="OTHER">Khác</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
+                    </div>
+
+                    {/* National - dropdown with flags */}
+                    <div className="relative">
+                      <label className={labelClass}>
+                        {t("runnerNational")} <span className="text-red-500">*</span>
+                      </label>
+                      <select
                         value={athlete.national}
                         onChange={(e) =>
                           updateAthlete(index, "national", e.target.value)
                         }
-                        className={inputClass}
-                      />
+                        className={selectClass}
+                        required
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
                     </div>
+
+                    {/* Size Shirt - from campaign sizeShirtOptions */}
+                    <div className="relative">
+                      <label className={labelClass}>
+                        {t("runnerSizeShirt")} <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={athlete.sizeShirt}
+                        onChange={(e) =>
+                          updateAthlete(index, "sizeShirt", e.target.value)
+                        }
+                        className={selectClass}
+                        required
+                      >
+                        <option value="">{t("runnerSelectSize")}</option>
+                        {sizeShirtOptions.map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
+                    </div>
+
+                    {/* Province */}
                     <div className="relative">
                       <label className={labelClass}>
                         {t("runnerProvince")}
@@ -654,6 +801,8 @@ export default function CampaignDetailPage() {
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
                     </div>
+
+                    {/* Location */}
                     <div>
                       <label className={labelClass}>
                         {t("runnerLocation")}
@@ -665,29 +814,8 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "location", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM"
                       />
-                    </div>
-
-                    {/* Sport info */}
-                    <div className="relative">
-                      <label className={labelClass}>
-                        {t("runnerSizeShirt")}
-                      </label>
-                      <select
-                        value={athlete.sizeShirt}
-                        onChange={(e) =>
-                          updateAthlete(index, "sizeShirt", e.target.value)
-                        }
-                        className={selectClass}
-                      >
-                        <option value="">{t("runnerSelectSize")}</option>
-                        {SHIRT_SIZES.map((size) => (
-                          <option key={size} value={size}>
-                            {size}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
                       <label className={labelClass}>{t("runnerClub")}</label>
@@ -698,6 +826,7 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "club", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="5Sport Runner"
                       />
                     </div>
                     <div>
@@ -711,6 +840,7 @@ export default function CampaignDetailPage() {
                           updateAthlete(index, "nameInBib", e.target.value)
                         }
                         className={inputClass}
+                        placeholder="Nguyen Van A"
                       />
                     </div>
                     <div className="relative">
@@ -745,7 +875,7 @@ export default function CampaignDetailPage() {
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div>
                           <label className={labelClass}>
-                            {t("runnerMedicalName")}
+                            {t("runnerMedicalName")} <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -758,11 +888,12 @@ export default function CampaignDetailPage() {
                               )
                             }
                             className={inputClass}
+                            required
                           />
                         </div>
                         <div>
                           <label className={labelClass}>
-                            {t("runnerMedicalPhone")}
+                            {t("runnerMedicalPhone")} <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="tel"
@@ -775,6 +906,7 @@ export default function CampaignDetailPage() {
                               )
                             }
                             className={inputClass}
+                            required
                           />
                         </div>
                         <div>
