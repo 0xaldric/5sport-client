@@ -106,6 +106,7 @@ export * from './eventResponseDtoStatus';
 export * from './eventSession';
 export * from './generateUsersDto';
 export * from './googleTokenDto';
+export * from './guardianInfoDto';
 export * from './initSepayPaymentDto';
 export * from './leaderboard';
 export * from './leaderboardControllerFindAllParams';

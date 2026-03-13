@@ -201,7 +201,16 @@
     "visitFanpage": "Visit",
     "campaignInfo": "Event Information",
     "runnerDistance": "Distance",
-    "runnerSelectDistance": "Select distance"
+    "runnerSelectDistance": "Select distance",
+    "guardianInfo": "Guardian Information",
+    "guardianWarning": "Athletes under 18 must provide guardian information",
+    "guardianFullName": "Guardian Full Name",
+    "guardianDateOfBirth": "Guardian Date of Birth",
+    "guardianIdentityCard": "Guardian ID / Passport",
+    "guardianEmail": "Guardian Email",
+    "guardianPhoneNumber": "Guardian Phone Number",
+    "guardianRelationship": "Relationship to Athlete",
+    "guardianRelationshipPlaceholder": "e.g. Parent, Sibling..."
   },
   "common": {
     "language": "Language",

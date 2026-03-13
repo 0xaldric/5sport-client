@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { AthleteInfoDtoGender } from './athleteInfoDtoGender';
+import type { GuardianInfoDto } from './guardianInfoDto';
 
 export interface AthleteInfoDto {
   /** Cự ly đăng ký */
@@ -19,23 +20,25 @@ export interface AthleteInfoDto {
   /** Email */
   email: string;
   /** Giới tính */
-  gender?: AthleteInfoDtoGender;
-  /** Số CCCD / Hộ chiếu */
-  identityCard?: string;
-  /** Địa chỉ */
-  location?: string;
-  /** Quốc tịch */
-  national?: string;
-  /** Mã tỉnh/thành phố (lấy từ API province) */
-  provinceCode?: string;
+  gender: AthleteInfoDtoGender;
   /** Ngày sinh */
-  dateOfBirth?: string;
+  dateOfBirth: string;
+  /** Số CCCD / Hộ chiếu */
+  identityCard: string;
+  /** Quốc tịch */
+  national: string;
+  /** Mã tỉnh/thành phố (lấy từ API province) */
+  provinceCode: string;
+  /** Địa chỉ */
+  location: string;
+  /** Tên trên BIB */
+  nameInBib: string;
+  /** Thông tin người giám hộ (bắt buộc nếu vận động viên dưới 18 tuổi) */
+  guardian?: GuardianInfoDto;
   /** Size áo (theo danh sách sizeShirtOptions của campaign) */
   sizeShirt?: string;
   /** Câu lạc bộ */
   club?: string;
-  /** Tên trên BIB */
-  nameInBib?: string;
   /** SĐT người liên hệ y tế */
   medicalInformationPhoneNumber?: string;
   /** Tên người liên hệ y tế */

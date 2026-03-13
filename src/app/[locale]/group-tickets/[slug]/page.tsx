@@ -85,6 +85,12 @@ interface AthleteForm {
   typeOfMedicine: string;
   bloodType: string;
   distance: string;
+  guardianFullName: string;
+  guardianDateOfBirth: string;
+  guardianIdentityCard: string;
+  guardianEmail: string;
+  guardianPhoneNumber: string;
+  guardianRelationship: string;
 }
 
 const emptyAthlete: AthleteForm = {
@@ -107,6 +113,12 @@ const emptyAthlete: AthleteForm = {
   typeOfMedicine: "",
   bloodType: "",
   distance: "",
+  guardianFullName: "",
+  guardianDateOfBirth: "",
+  guardianIdentityCard: "",
+  guardianEmail: "",
+  guardianPhoneNumber: "",
+  guardianRelationship: "",
 };
 
 const inputClass =
@@ -141,6 +153,17 @@ export default function CampaignDetailPage() {
     (provincesData as any)?.data ?? (provincesData as any) ?? [];
 
   const createOrder = useCampaignOrderControllerCreate();
+  const isUnder18 = (dateOfBirth: string) => {
+    if (!dateOfBirth) return false;
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age < 18;
+  };
 
   // Form state
   const [lastName, setLastName] = useState("");
@@ -181,8 +204,9 @@ export default function CampaignDetailPage() {
     phoneNumber.trim() &&
     email.trim() &&
     email.includes("@") &&
-    athletes.every(
-      (a) =>
+    athletes.every((a) => {
+      const isAUnder18 = isUnder18(a.dateOfBirth);
+      const baseValid =
         a.distance &&
         a.lastName.trim() &&
         a.firstName.trim() &&
@@ -195,8 +219,24 @@ export default function CampaignDetailPage() {
         a.sizeShirt &&
         a.national &&
         a.medicalInformationName.trim() &&
-        a.medicalInformationPhoneNumber.trim()
-    );
+        a.medicalInformationPhoneNumber.trim();
+
+      if (!baseValid) return false;
+
+      if (isAUnder18) {
+        return (
+          a.guardianFullName.trim() &&
+          a.guardianDateOfBirth.trim() &&
+          a.guardianIdentityCard.trim() &&
+          a.guardianEmail.trim() &&
+          a.guardianEmail.includes("@") &&
+          a.guardianPhoneNumber.trim() &&
+          a.guardianRelationship.trim()
+        );
+      }
+
+      return true;
+    });
 
   const handleClickSubmit = () => {
     if (!isFormValid) return;
@@ -215,7 +255,7 @@ export default function CampaignDetailPage() {
         data: {
           lastName,
           firstName,
-          email: email || undefined,
+          email,
           phoneNumber,
           athletes: athletes.map(
             (a): AthleteInfoDto => ({
@@ -225,17 +265,17 @@ export default function CampaignDetailPage() {
               firstName: a.firstName,
               phoneNumber: a.phoneNumber,
               email: a.email,
-              identityCard: a.identityCard || undefined,
+              identityCard: a.identityCard,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              gender: (a.gender as any) || undefined,
-              location: a.location || undefined,
-              national: a.national || undefined,
-              provinceCode: a.provinceCode || undefined,
-              dateOfBirth: a.dateOfBirth || undefined,
+              gender: a.gender as any,
+              location: a.location,
+              national: a.national,
+              provinceCode: a.provinceCode,
+              dateOfBirth: a.dateOfBirth,
               sizeShirt:
                 (a.sizeShirt as AthleteInfoDto["sizeShirt"]) || undefined,
               club: a.club || undefined,
-              nameInBib: a.nameInBib || undefined,
+              nameInBib: a.nameInBib,
               medicalInformationPhoneNumber:
                 a.medicalInformationPhoneNumber || undefined,
               medicalInformationName:
@@ -243,6 +283,16 @@ export default function CampaignDetailPage() {
               medicalInformation: a.medicalInformation || undefined,
               typeOfMedicine: a.typeOfMedicine || undefined,
               bloodType: a.bloodType || undefined,
+              guardian: isUnder18(a.dateOfBirth)
+                ? {
+                  fullName: a.guardianFullName,
+                  dateOfBirth: a.guardianDateOfBirth,
+                  identityCard: a.guardianIdentityCard,
+                  email: a.guardianEmail,
+                  phoneNumber: a.guardianPhoneNumber,
+                  relationship: a.guardianRelationship,
+                }
+                : undefined,
             })
           ),
         },
@@ -865,6 +915,106 @@ export default function CampaignDetailPage() {
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-2.5 top-[30px] h-4 w-4 text-muted-foreground" />
                     </div>
+
+                    {/* Guardian Information - only for under 18 */}
+                    {isUnder18(athlete.dateOfBirth) && (
+                      <div className="sm:col-span-2 lg:col-span-3">
+                        <Separator className="mb-4" />
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {t("guardianInfo")}
+                        </p>
+                        <p className="mb-4 text-xs italic text-red-500">
+                          {t("guardianWarning")}
+                        </p>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianFullName")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={athlete.guardianFullName}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianFullName", e.target.value)
+                              }
+                              className={inputClass}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianDateOfBirth")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              value={athlete.guardianDateOfBirth}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianDateOfBirth", e.target.value)
+                              }
+                              className={inputClass}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianIdentityCard")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={athlete.guardianIdentityCard}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianIdentityCard", e.target.value)
+                              }
+                              className={inputClass}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianEmail")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="email"
+                              value={athlete.guardianEmail}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianEmail", e.target.value)
+                              }
+                              className={inputClass}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianPhoneNumber")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              value={athlete.guardianPhoneNumber}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianPhoneNumber", e.target.value)
+                              }
+                              className={inputClass}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>
+                              {t("guardianRelationship")} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={athlete.guardianRelationship}
+                              onChange={(e) =>
+                                updateAthlete(index, "guardianRelationship", e.target.value)
+                              }
+                              className={inputClass}
+                              placeholder={t("guardianRelationshipPlaceholder")}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Medical section - full width */}
                     <div className="sm:col-span-2 lg:col-span-3">

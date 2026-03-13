@@ -201,7 +201,16 @@
     "visitFanpage": "Truy cập",
     "campaignInfo": "Thông tin sự kiện",
     "runnerDistance": "Cự ly",
-    "runnerSelectDistance": "Chọn cự ly"
+    "runnerSelectDistance": "Chọn cự ly",
+    "guardianInfo": "Thông tin người giám hộ",
+    "guardianWarning": "Vận động viên dưới 18 tuổi bắt buộc phải có thông tin người giám hộ",
+    "guardianFullName": "Họ và tên người giám hộ",
+    "guardianDateOfBirth": "Ngày sinh người giám hộ",
+    "guardianIdentityCard": "CCCD / Hộ chiếu người giám hộ",
+    "guardianEmail": "Email của người giám hộ",
+    "guardianPhoneNumber": "Số điện thoại người giám hộ",
+    "guardianRelationship": "Mối quan hệ với vận động viên",
+    "guardianRelationshipPlaceholder": "Ví dụ: Cha, Mẹ, Anh, Chị..."
   },
   "common": {
     "language": "Ngôn ngữ",
