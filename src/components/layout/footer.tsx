@@ -37,7 +37,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Image src="/logo.png" alt="5Sport" width={64} height={64} className="rounded-lg" />
             <p className="mt-3 text-sm font-semibold text-white">
-              Công ty cổ phần công nghệ 5Solution
+              CÔNG TY CỔ PHẦN CÔNG NGHỆ 5SOLUTION
             </p>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">
               {t("aboutDesc")}
@@ -95,8 +95,8 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-                <a href="mailto:info@5sport.vn" className="transition-colors duration-200 hover:text-white">
-                  info@5sport.vn
+                <a href="mailto:5sport@5sport.vn" className="transition-colors duration-200 hover:text-white">
+                  5sport@5sport.vn
                 </a>
               </li>
               <li className="flex items-start gap-2">

@@ -133,7 +133,7 @@ export default async function LocaleLayout({
               url: BASE_URL,
               logo: `${BASE_URL}/logo.png`,
               description: DESCRIPTION,
-              email: "info@5sport.vn",
+              email: "5sport@5sport.vn",
               telephone: "+84336963998",
               sameAs: [
                 "https://www.facebook.com/5sportvn",
