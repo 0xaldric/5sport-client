@@ -50,64 +50,7 @@ import type { AthleteInfoDto } from "@/lib/schemas/athleteInfoDto";
 const BLOOD_TYPES = ["A", "B", "AB", "O"] as const;
 
 // TODO: replace with campaign.regulations when API is ready
-const MOCK_REGULATIONS = `
-# 1. Đối tượng tham gia
-
-
-- Vận động viên từ **18 tuổi trở lên** (tính đến ngày thi đấu).
-- Vận động viên từ **15–17 tuổi** cần có sự đồng ý bằng văn bản của người giám hộ.
-- Không giới hạn quốc tịch.
-
-## 2. Cự ly thi đấu
-
-| Cự ly | Giới tính | Giới hạn thời gian |
-|-------|-----------|-------------------|
-| 5km   | Nam & Nữ  | 60 phút           |
-| 10km  | Nam & Nữ  | 120 phút          |
-| 21km  | Nam & Nữ  | 3 giờ             |
-| 42km  | Nam & Nữ  | 6 giờ             |
-
-## 3. Thời gian & Địa điểm
-
-- **Ngày thi đấu:** Theo thông báo chính thức của BTC
-- **Địa điểm tập kết:** Quảng trường chính (cổng A)
-- **Giờ xuất phát:** 5:30 SA – 6:00 SA (theo từng cự ly)
-
-## 4. Đăng ký & Thanh toán
-
-1. Điền đầy đủ thông tin trên form đăng ký trực tuyến.
-2. Hoàn tất thanh toán trong vòng **30 phút** sau khi đặt vé.
-3. Vé sẽ được gửi về **email** đăng ký sau khi xác nhận thanh toán.
-
-> ⚠️ **Lưu ý:** Vé đã mua **không được hoàn tiền** trong mọi trường hợp. Có thể chuyển nhượng cho người khác trước ngày thi đấu 7 ngày.
-
-## 5. Bộ kit thi đấu
-
-- Áo thi đấu chính thức
-- BIB số (có chip tính giờ)
-- Túi đựng đồ
-- Huy chương hoàn thành (tất cả VĐV về đích trong thời gian quy định)
-- Nước uống tại các trạm tiếp nước
-
-## 6. Quy định thi đấu
-
-- Bắt buộc đeo **BIB** trong suốt quá trình thi đấu.
-- Không sử dụng phương tiện hỗ trợ (xe đạp, xe máy, v.v.).
-- Tuân thủ hướng dẫn của tình nguyện viên và ban tổ chức.
-- Vi phạm quy định sẽ bị **truất quyền thi đấu**.
-
-## 7. Y tế & An toàn
-
-- BTC bố trí đội ngũ y tế dọc đường đua.
-- Vận động viên có vấn đề sức khỏe nên **tham khảo ý kiến bác sĩ** trước khi đăng ký.
-- Trường hợp khẩn cấp liên hệ hotline: **+84 336 963 998**
-
-## 8. Liên hệ Ban Tổ Chức
-
-- 📧 Email: **info@5sport.vn**
-- 📱 Hotline: **+84 336 963 998**
-- 💬 Zalo Group: Xem link trong thông tin sự kiện
-`.trim();
+const MOCK_REGULATIONS = ``.trim();
 
 const COUNTRIES = [
   { code: "VN", name: "Việt Nam", flag: "🇻🇳" },
@@ -508,8 +451,7 @@ export default function CampaignDetailPage() {
         )}
 
         {/* Thể lệ */}
-        {/* TODO: replace MOCK_REGULATIONS with campaign.regulations when API is ready */}
-        <Card className="mt-6 border-slate-200">
+        {campaign.regulations && <Card className="mt-6 border-slate-200">
           <CardHeader className={showRegulations ? "pb-3" : ""}>
             <button
               type="button"
@@ -532,7 +474,7 @@ export default function CampaignDetailPage() {
               </div>
             </CardContent>
           )}
-        </Card>
+        </Card>}
 
         {/* Campaign Group Info */}
         {(campaign.groupName || campaign.groupLeader || campaign.hotline || campaign.zaloGroupUrl || campaign.regulationsUrl || campaign.fanpageUrl) && (
