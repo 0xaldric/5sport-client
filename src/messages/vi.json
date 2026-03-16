@@ -73,13 +73,19 @@
     "viewAll": "Xem tất cả"
   },
   "footer": {
-    "about": "Về 5Sport",
-    "aboutDesc": "Nền tảng kết nối cộng đồng thể thao hàng đầu Việt Nam",
-    "links": "Liên kết",
-    "contact": "Liên hệ",
+    "aboutDesc": "Nền tảng kết nối cộng đồng thể thao hàng đầu Việt Nam, thuộc hệ sinh thái 5Solution",
+    "ecosystem": "Hệ sinh thái",
+    "policies": "Chính sách",
+    "about": "Về chúng tôi",
+    "regulations": "Quy chế 5sport.vn",
     "terms": "Điều khoản sử dụng",
-    "privacy": "Chính sách bảo mật",
-    "copyright": "© 2024 5Sport. Tất cả quyền được bảo lưu."
+    "privacyPersonal": "Chính sách bảo mật thông tin cá nhân",
+    "security": "Chính sách bảo mật",
+    "transaction": "Quy trình giao dịch",
+    "dispute": "Quy trình giải quyết tranh chấp, khiếu nại",
+    "contact": "Liên hệ",
+    "followUs": "Theo dõi chúng tôi",
+    "copyright": "© 2026 5Solution. Tất cả quyền được bảo lưu."
   },
   "events": {
     "title": "Sự kiện thể thao",

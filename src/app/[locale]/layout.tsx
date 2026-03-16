@@ -15,8 +15,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "5Sport - Nền tảng thể thao cộng đồng",
-  description:
-    "Kết nối cộng đồng thể thao, thi đấu và phát triển cùng 5Sport",
+  description: "Kết nối cộng đồng thể thao, thi đấu và phát triển cùng 5Sport",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "5Sport - Nền tảng thể thao cộng đồng",
+    description: "Kết nối cộng đồng thể thao, thi đấu và phát triển cùng 5Sport",
+    images: [{ url: "/logo.png" }],
+    siteName: "5Sport",
+  },
 };
 
 export default async function LocaleLayout({

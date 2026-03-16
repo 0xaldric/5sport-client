@@ -18,6 +18,7 @@ import { LanguageSwitcher } from "./language-switcher";
 import { MobileNav } from "./mobile-nav";
 import { AuthModal } from "@/components/auth/auth-modal";
 import Script from "next/script";
+import Image from "next/image";
 
 export function Header() {
   const t = useTranslations("nav");
@@ -30,8 +31,8 @@ export function Header() {
   const navItems = [
     { href: "/", label: t("home") },
     { href: "/events", label: t("tournaments") },
-    { href: "/clubs", label: t("clubs") },
-    { href: "/groups", label: t("groups") },
+    // { href: "/clubs", label: t("clubs") },
+    // { href: "/groups", label: t("groups") },
     { href: "/group-tickets", label: t("groupTickets") },
   ];
 
@@ -50,13 +51,8 @@ export function Header() {
       <header className="sticky top-0 z-50 w-full bg-primary">
         <div className="mx-auto flex h-16 max-w-container items-center justify-between px-6 lg:px-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-              <span className="text-sm font-extrabold text-primary">5</span>
-            </div>
-            <span className="text-lg font-extrabold tracking-tight text-white">
-              SPORT
-            </span>
+          <Link href="/" className="flex items-center">
+            <Image src="/logo.png" alt="5Sport" width={48} height={48} className="rounded-lg" priority />
           </Link>
 
           {/* Desktop Navigation */}

@@ -19,7 +19,7 @@ const mockTournaments = [
   {
     id: 2,
     title: "Giải Quận Pickleball Liên Câu Châu Á - OYSHO PADEL CUP",
-    image: "https://images.unsplash.com/photo-1461896836934-bd45ba02db7c?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=400&h=250&fit=crop",
     date: "22/03/2024 - 25/03/2024",
     location: "Quận 1, TP.HCM, Padel Center",
     participants: 64,

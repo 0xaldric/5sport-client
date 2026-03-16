@@ -73,13 +73,19 @@
     "viewAll": "View All"
   },
   "footer": {
-    "about": "About 5Sport",
-    "aboutDesc": "Vietnam's leading sports community connection platform",
-    "links": "Links",
-    "contact": "Contact",
+    "aboutDesc": "Vietnam's leading sports community platform, part of the 5Solution ecosystem",
+    "ecosystem": "Ecosystem",
+    "policies": "Policies",
+    "about": "About Us",
+    "regulations": "5sport.vn Regulations",
     "terms": "Terms of Service",
-    "privacy": "Privacy Policy",
-    "copyright": "© 2024 5Sport. All rights reserved."
+    "privacyPersonal": "Personal Data Privacy Policy",
+    "security": "Security Policy",
+    "transaction": "Transaction Process",
+    "dispute": "Dispute & Complaint Resolution",
+    "contact": "Contact",
+    "followUs": "Follow Us",
+    "copyright": "© 2026 5Solution. All rights reserved."
   },
   "events": {
     "title": "Sports Events",
