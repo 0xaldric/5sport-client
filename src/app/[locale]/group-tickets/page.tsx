@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useCampaignControllerFindPublic } from "@/lib/services/campaigns/campaigns";
+import type { CampaignPublicResponseDto } from "@/lib/schemas/campaignPublicResponseDto";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,8 +26,9 @@ export default function GroupTicketsPage() {
     limit,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const campaigns: any[] = (data as any)?.data ?? (data as any) ?? [];
+  // Interceptor unwraps API envelope, so runtime data is { data: [...], meta? }
+  const campaigns: CampaignPublicResponseDto[] =
+    (data as unknown as { data?: CampaignPublicResponseDto[] } | undefined)?.data ?? [];
   const hasMore = campaigns.length >= limit;
 
   const formatDate = (dateStr: string) => {

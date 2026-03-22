@@ -46,6 +46,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { AthleteInfoDto } from "@/lib/schemas/athleteInfoDto";
+import type { AthleteInfoDtoGender } from "@/lib/schemas/athleteInfoDtoGender";
+import type { CampaignPublicResponseDto } from "@/lib/schemas/campaignPublicResponseDto";
+import type { ProvinceDto } from "@/lib/schemas/provinceDto";
+import type { CreateOrderResponseDto } from "@/lib/schemas/createOrderResponseDto";
 
 const BLOOD_TYPES = ["A", "B", "AB", "O"] as const;
 
@@ -145,19 +149,16 @@ export default function CampaignDetailPage() {
   const { data: campaignData, isLoading: campaignLoading } =
     useCampaignControllerFindBySlug(slug);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const campaign: any = (campaignData as any)?.data ?? (campaignData as any);
-
-  console.log(campaign);
+  // Interceptor unwraps API envelope { status, code, data } → data,
+  // so runtime value is CampaignPublicResponseDto directly
+  const campaign = campaignData as unknown as CampaignPublicResponseDto | undefined;
 
   // Distances from campaign response (ticket types)
-  const distances: { distance: string; price: number }[] =
-    campaign?.distances ?? [];
+  const distances = campaign?.distances ?? [];
 
   const { data: provincesData } = useProvinceControllerListProvinces();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const provinces: any[] =
-    (provincesData as any)?.data ?? (provincesData as any) ?? [];
+  // Interceptor unwraps envelope, so runtime value is ProvinceDto[] directly
+  const provinces = (provincesData as unknown as ProvinceDto[] | undefined) ?? [];
 
   const createOrder = useCampaignOrderControllerCreate();
   const isUnder18 = (dateOfBirth: string) => {
@@ -257,7 +258,6 @@ export default function CampaignDetailPage() {
     // Step 1: Create order → get orderCode
     let orderCode: string;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = (await createOrder.mutateAsync({
         campaignId: campaign.id,
         data: {
@@ -267,15 +267,13 @@ export default function CampaignDetailPage() {
           phoneNumber,
           athletes: athletes.map(
             (a): AthleteInfoDto => ({
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              distance: a.distance as any,
+              distance: a.distance,
               lastName: a.lastName,
               firstName: a.firstName,
               phoneNumber: a.phoneNumber,
               email: a.email,
               identityCard: a.identityCard,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              gender: a.gender as any,
+              gender: a.gender as AthleteInfoDtoGender,
               location: a.location,
               national: a.national,
               provinceCode: a.provinceCode,
@@ -304,10 +302,9 @@ export default function CampaignDetailPage() {
             })
           ),
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      })) as any;
+      })) as unknown as CreateOrderResponseDto;
 
-      orderCode = res?.orderCode;
+      orderCode = res.orderCode;
       if (!orderCode) throw new Error("Missing orderCode in response");
     } catch {
       setShowConfirmModal(false);
