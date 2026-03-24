@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePublicEventControllerFindOne } from "@/lib/services/public/public";
 import { useParticipantControllerFindAll } from "@/lib/services/participants/participants";
+import { useStageControllerFindAllBySession } from "@/lib/services/stages/stages";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { EventParticipant } from "@/lib/schemas/eventParticipant";
+import type { Stage } from "@/lib/schemas/stage";
+import type { SessionResponseDto } from "@/lib/schemas/sessionResponseDto";
 import {
   ArrowLeft,
   Calendar,
@@ -24,7 +27,7 @@ import {
   Users,
   Trophy,
   Info,
-  Ticket,
+  Layers,
 } from "lucide-react";
 import type { EventResponseDto } from "@/lib/schemas/eventResponseDto";
 
@@ -68,7 +71,25 @@ export default function EventDetailPage({
   const { data: participantsData } = useParticipantControllerFindAll(id);
 
   const event = data as EventResponseDto | undefined;
-  const participants = (participantsData as { data?: EventParticipant[] } | undefined)?.data ?? [];
+  const participants = (participantsData as EventParticipant[] | undefined) ?? [];
+
+  const sessionGroups = useMemo(() => {
+    const groups = new Map<string, { session: SessionResponseDto; participants: EventParticipant[] }>();
+    const noSession: EventParticipant[] = [];
+
+    for (const p of participants) {
+      if (p.sessionId && p.session) {
+        if (!groups.has(p.sessionId)) {
+          groups.set(p.sessionId, { session: p.session as unknown as SessionResponseDto, participants: [] });
+        }
+        groups.get(p.sessionId)!.participants.push(p);
+      } else {
+        noSession.push(p);
+      }
+    }
+
+    return { groups: Array.from(groups.entries()), noSession };
+  }, [participants]);
 
   if (isLoading) {
     return (
@@ -366,9 +387,8 @@ export default function EventDetailPage({
               </div>
             </div>
 
-            {/* Participants list */}
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-              {participants.length === 0 ? (
+            {participants.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-col items-center gap-3 py-16 text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
                     <Users className="h-7 w-7 text-slate-400" />
@@ -381,64 +401,183 @@ export default function EventDetailPage({
                     </Button>
                   </Link>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50">
-                        <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">#</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Vận động viên</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Mã vé</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Ngày đăng ký</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Trạng thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {participants.map((p, i) => (
-                        <tr key={p.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
-                          <td className="px-4 py-3 font-medium text-slate-400">{i + 1}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                                {(p.athlete?.name ?? p.user?.email ?? "?").charAt(0).toUpperCase()}
-                              </div>
-                              <span className="font-medium text-secondary">
-                                {p.athlete?.name ?? p.user?.email ?? "—"}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5 text-slate-500">
-                              <Ticket className="h-3.5 w-3.5" />
-                              <span className="font-mono text-xs">{p.ticketCode}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-slate-500">
-                            {new Date(p.registrationDate).toLocaleDateString("vi-VN")}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <Badge
-                              variant="outline"
-                              className={`text-xs font-semibold ${p.status === "CHECKED_IN"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : p.status === "REGISTERED"
-                                  ? "border-primary/20 bg-primary/5 text-primary"
-                                  : "border-slate-200 bg-slate-50 text-slate-500"
-                                }`}
-                            >
-                              {p.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+              </div>
+            ) : sessionGroups.groups.length > 0 ? (
+              <>
+                {sessionGroups.groups.map(([sessionId, { session, participants: sessionParticipants }]) => (
+                  <SessionGroup
+                    key={sessionId}
+                    eventId={id}
+                    sessionId={sessionId}
+                    session={session}
+                    participants={sessionParticipants}
+                  />
+                ))}
+                {sessionGroups.noSession.length > 0 && (
+                  <ParticipantsTable participants={sessionGroups.noSession} label="Không có hạng mục" />
+                )}
+              </>
+            ) : (
+              <ParticipantsTable participants={participants} />
+            )}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function stageTypeLabel(type: string) {
+  switch (type) {
+    case "ROUND_ROBIN_PLAYOFF": return "Vòng bảng";
+    case "SINGLE_ELIMINATION": return "Loại trực tiếp";
+    case "DOUBLE_ELIMINATION": return "Loại kép";
+    case "FLEX": return "Linh hoạt";
+    default: return type;
+  }
+}
+
+function stageStatusStyle(status: string) {
+  switch (status) {
+    case "IN_PROGRESS": return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "COMPLETED": return "border-slate-200 bg-slate-100 text-slate-500";
+    case "READY": return "border-primary/20 bg-primary/5 text-primary";
+    default: return "border-slate-200 bg-slate-50 text-slate-400";
+  }
+}
+
+function stageStatusLabel(status: string) {
+  switch (status) {
+    case "DRAFT": return "Nháp";
+    case "READY": return "Sẵn sàng";
+    case "IN_PROGRESS": return "Đang diễn ra";
+    case "COMPLETED": return "Hoàn thành";
+    default: return status;
+  }
+}
+
+function SessionGroup({
+  eventId,
+  sessionId,
+  session,
+  participants,
+}: {
+  eventId: string;
+  sessionId: string;
+  session: SessionResponseDto;
+  participants: EventParticipant[];
+}) {
+  const { data: stagesData } = useStageControllerFindAllBySession(eventId, sessionId);
+  const stages = (stagesData as Stage[] | undefined) ?? [];
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {/* Session header */}
+      <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
+              <h3 className="font-bold text-secondary">{session.name}</h3>
+              <Badge variant="outline" className="border-slate-200 text-xs text-slate-500">
+                {session.competitionFormat === "DOUBLES" ? "Đôi" : "Đơn"}
+              </Badge>
+            </div>
+            <p className="mt-0.5 text-xs text-slate-400">{participants.length} vận động viên</p>
+          </div>
+
+          {stages.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {stages
+                .slice()
+                .sort((a, b) => a.sortOrder - b.sortOrder)
+                .map((stage) => (
+                  <div
+                    key={stage.id}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5"
+                  >
+                    <Trophy className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-xs font-medium text-secondary">{stage.name}</span>
+                    <span className="text-xs text-slate-400">({stageTypeLabel(stage.stageType)})</span>
+                    <Badge variant="outline" className={`text-xs font-semibold ${stageStatusStyle(stage.status)}`}>
+                      {stageStatusLabel(stage.status)}
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ParticipantsTable participants={participants} />
+    </div>
+  );
+}
+
+function ParticipantsTable({
+  participants,
+  label,
+}: {
+  participants: EventParticipant[];
+  label?: string;
+}) {
+  return (
+    <div>
+      {label && (
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-3">
+          <p className="text-xs font-semibold text-slate-500">{label}</p>
+        </div>
+      )}
+      {participants.length === 0 ? (
+        <p className="py-8 text-center text-sm text-slate-400">Chưa có người tham gia</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50">
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">#</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Vận động viên</th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Ngày đăng ký</th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {participants.map((p, i) => (
+                <tr key={p.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
+                  <td className="px-4 py-3 font-medium text-slate-400">{i + 1}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                        {(p.athlete?.name ?? p.user?.email ?? "?").charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium text-secondary">
+                        {p.athlete?.name ?? p.user?.email ?? "—"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {new Date(p.registrationDate).toLocaleDateString("vi-VN")}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Badge
+                      variant="outline"
+                      className={`text-xs font-semibold ${
+                        p.status === "CHECKED_IN"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : p.status === "REGISTERED"
+                            ? "border-primary/20 bg-primary/5 text-primary"
+                            : "border-slate-200 bg-slate-50 text-slate-500"
+                      }`}
+                    >
+                      {p.status}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
