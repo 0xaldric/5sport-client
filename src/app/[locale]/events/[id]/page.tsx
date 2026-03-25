@@ -4,7 +4,9 @@ import { use, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePublicEventControllerFindOne } from "@/lib/services/public/public";
 import { useParticipantControllerFindAll } from "@/lib/services/participants/participants";
-import { useStageControllerFindAllBySession } from "@/lib/services/stages/stages";
+import { useStageControllerFindAllBySession, useStageControllerFindMatchesByStage } from "@/lib/services/stages/stages";
+import { useMatchScoreControllerFindAll } from "@/lib/services/match-scores/match-scores";
+import type { MatchScore } from "@/lib/schemas/matchScore";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -24,12 +26,18 @@ import {
   CreditCard,
   FileText,
   CheckCircle2,
+  BadgeCheck,
   Users,
   Trophy,
   Info,
   Layers,
+  Swords,
 } from "lucide-react";
 import type { EventResponseDto } from "@/lib/schemas/eventResponseDto";
+import type { Match } from "@/lib/schemas/match";
+
+type EventMedia = { id: string; type: "LOGO" | "WALLPAPER" | "EMAIL_IMAGE"; url: string };
+type EventWithMedia = EventResponseDto & { media?: EventMedia[] };
 
 function formatDateTime(dateStr: string) {
   return new Date(dateStr).toLocaleString("vi-VN", {
@@ -56,7 +64,7 @@ function getStatusStyle(status: string) {
   }
 }
 
-type Tab = "overview" | "bracket" | "participants";
+type Tab = "overview" | "bracket" | "participants" | "matches";
 
 export default function EventDetailPage({
   params,
@@ -70,7 +78,17 @@ export default function EventDetailPage({
   const { data, isLoading } = usePublicEventControllerFindOne(id);
   const { data: participantsData } = useParticipantControllerFindAll(id);
 
-  const event = data as EventResponseDto | undefined;
+  const event = data as EventWithMedia | undefined;
+
+  const logoUrl = useMemo(() => {
+    const logos = event?.media?.filter((m) => m.type === "LOGO") ?? [];
+    return logos[logos.length - 1]?.url;
+  }, [event]);
+
+  const wallpaperUrl = useMemo(() => {
+    const wallpapers = event?.media?.filter((m) => m.type === "WALLPAPER") ?? [];
+    return wallpapers[wallpapers.length - 1]?.url;
+  }, [event]);
   const participants = (participantsData as EventParticipant[] | undefined) ?? [];
 
   const sessionGroups = useMemo(() => {
@@ -128,6 +146,7 @@ export default function EventDetailPage({
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "overview", label: "Tổng quan", icon: <Info className="h-4 w-4" /> },
     { key: "bracket", label: "Bảng đấu", icon: <Trophy className="h-4 w-4" /> },
+    { key: "matches", label: "Trận đấu", icon: <Swords className="h-4 w-4" /> },
     { key: "participants", label: `Người tham gia${participants.length > 0 ? ` (${participants.length})` : ""}`, icon: <Users className="h-4 w-4" /> },
   ];
 
@@ -145,9 +164,9 @@ export default function EventDetailPage({
       {/* === Banner === */}
       <div className="relative mt-6 overflow-hidden rounded-2xl">
         <div className="relative aspect-[3/1] w-full bg-gradient-to-br from-secondary via-secondary/90 to-primary/80">
-          {event.bannerImageUrl ? (
+          {wallpaperUrl ? (
             <Image
-              src={event.bannerImageUrl}
+              src={wallpaperUrl}
               alt={event.name}
               fill
               className="object-cover"
@@ -167,9 +186,9 @@ export default function EventDetailPage({
           <div className="flex flex-col gap-5 md:flex-row md:items-end">
             {/* Logo */}
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border-4 border-white bg-white shadow-lg md:h-32 md:w-32">
-              {event.bannerImageUrl ? (
+              {logoUrl ? (
                 <Image
-                  src={event.bannerImageUrl}
+                  src={logoUrl}
                   alt={event.name}
                   width={120}
                   height={120}
@@ -190,15 +209,20 @@ export default function EventDetailPage({
                 <Badge className="border-0 bg-secondary/80 text-xs font-semibold text-white backdrop-blur-sm">
                   {event.sportType}
                 </Badge>
-                <Badge
-                  variant="outline"
-                  className={`text-xs font-semibold ${getStatusStyle(event.status)}`}
-                >
-                  {t(statusKey)}
-                </Badge>
+                {event.status !== "PUBLISHED" && (
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-semibold ${getStatusStyle(event.status)}`}
+                  >
+                    {t(statusKey)}
+                  </Badge>
+                )}
               </div>
-              <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+              <h1 className="mt-2 flex items-center gap-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
                 {event.name}
+                {event.status === "PUBLISHED" && (
+                  <BadgeCheck className="h-6 w-6 shrink-0 text-[#1877F2]" strokeWidth={2.5} />
+                )}
               </h1>
               {event.brand && (
                 <p className="mt-1 text-sm font-medium text-white/70">{event.brand}</p>
@@ -373,6 +397,32 @@ export default function EventDetailPage({
           </div>
         )}
 
+        {/* Matches Tab */}
+        {activeTab === "matches" && (
+          <div className="space-y-4">
+            {sessionGroups.groups.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex flex-col items-center gap-3 py-16 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+                    <Swords className="h-7 w-7 text-slate-400" />
+                  </div>
+                  <p className="font-semibold text-secondary">Chưa có trận đấu</p>
+                  <p className="text-xs text-slate-400">Thông tin sẽ được cập nhật khi giải đấu bắt đầu</p>
+                </div>
+              </div>
+            ) : (
+              sessionGroups.groups.map(([sessionId, { session }]) => (
+                <MatchesSessionGroup
+                  key={sessionId}
+                  eventId={id}
+                  sessionId={sessionId}
+                  session={session}
+                />
+              ))
+            )}
+          </div>
+        )}
+
         {/* Participants Tab */}
         {activeTab === "participants" && (
           <div className="space-y-4">
@@ -423,6 +473,270 @@ export default function EventDetailPage({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function MatchesSessionGroup({
+  eventId,
+  sessionId,
+  session,
+}: {
+  eventId: string;
+  sessionId: string;
+  session: SessionResponseDto;
+}) {
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const { data: stagesData, isLoading } = useStageControllerFindAllBySession(eventId, sessionId);
+  const stages = (stagesData as Stage[] | undefined) ?? [];
+
+  function handleToggleMatch(matchId: string) {
+    setActiveMatchId((prev) => (prev === matchId ? null : matchId));
+  }
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-primary" />
+          <h3 className="font-bold text-secondary">{session.name}</h3>
+          <Badge variant="outline" className="border-slate-200 text-xs text-slate-500">
+            {session.competitionFormat === "DOUBLES" ? "Đôi" : "Đơn"}
+          </Badge>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3 p-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : stages.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-10 text-center">
+          <Trophy className="h-6 w-6 text-slate-300" />
+          <p className="text-sm text-slate-400">Chưa có vòng đấu</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-slate-100">
+          {stages
+            .slice()
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((stage) => (
+              <StageMatchesSection
+                key={stage.id}
+                eventId={eventId}
+                stage={stage}
+                activeMatchId={activeMatchId}
+                onToggleMatch={handleToggleMatch}
+              />
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StageMatchesSection({
+  eventId,
+  stage,
+  activeMatchId,
+  onToggleMatch,
+}: {
+  eventId: string;
+  stage: Stage;
+  activeMatchId: string | null;
+  onToggleMatch: (matchId: string) => void;
+}) {
+  const { data: matchesData, isLoading } = useStageControllerFindMatchesByStage(eventId, stage.id);
+  const matches = (matchesData as Match[] | undefined) ?? [];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between bg-primary/5 px-6 py-3">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-3.5 w-3.5 text-primary" />
+          <span className="text-sm font-semibold text-secondary">{stage.name}</span>
+          <span className="text-xs text-slate-400">({stageTypeLabel(stage.stageType)})</span>
+        </div>
+        <Badge variant="outline" className={`text-xs font-semibold ${stageStatusStyle(stage.status)}`}>
+          {stageStatusLabel(stage.status)}
+        </Badge>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2 p-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : matches.length === 0 ? (
+        <p className="py-6 text-center text-sm text-slate-400">Chưa có trận đấu trong vòng này</p>
+      ) : (
+        <div className="divide-y divide-slate-50">
+          {matches
+            .slice()
+            .sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0))
+            .map((match) => (
+              <MatchRow
+                key={match.id}
+                match={match}
+                isActive={activeMatchId === match.id}
+                onToggle={() => onToggleMatch(match.id)}
+              />
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function matchStatusStyle(status: string) {
+  switch (status) {
+    case "COMPLETED": return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "CANCELLED": return "border-slate-200 bg-slate-100 text-slate-500";
+    case "SCHEDULED": return "border-primary/20 bg-primary/5 text-primary";
+    case "IN_PROGRESS": return "border-red-200 bg-red-50 text-red-600";
+    default: return "border-slate-200 bg-slate-50 text-slate-400";
+  }
+}
+
+function matchStatusLabel(status: string) {
+  switch (status) {
+    case "SCHEDULED": return "Lịch đấu";
+    case "IN_PROGRESS": return "Đang diễn ra";
+    case "COMPLETED": return "Kết thúc";
+    case "CANCELLED": return "Huỷ";
+    default: return status;
+  }
+}
+
+function MatchRow({
+  match,
+  isActive,
+  onToggle,
+}: {
+  match: Match;
+  isActive: boolean;
+  onToggle: () => void;
+}) {
+  const team1Name =
+    (match.team1Name ??
+      [match.team1Player1?.name, match.team1Player2?.name].filter(Boolean).join(" / ")) ||
+    "-";
+  const team2Name =
+    (match.team2Name ??
+      [match.team2Player1?.name, match.team2Player2?.name].filter(Boolean).join(" / ")) ||
+    "-";
+
+  const canViewScore = match.status === "COMPLETED" || match.status === "IN_PROGRESS";
+
+  const { data: scoresData, isLoading: scoresLoading } = useMatchScoreControllerFindAll(
+    match.id,
+    { query: { enabled: isActive } },
+  );
+  const scores = ((scoresData as MatchScore[] | undefined) ?? [])
+    .slice()
+    .sort((a, b) => a.setNumber - b.setNumber);
+
+  return (
+    <div className={`transition-colors ${isActive ? "bg-slate-50" : "hover:bg-slate-50"}`}>
+      {/* Main row */}
+      <div className="flex items-center gap-3 px-6 py-3 text-sm">
+        <div className="w-24 shrink-0">
+          <p className="text-xs font-semibold text-secondary">{match.name}</p>
+          {match.courtNumber != null && (
+            <p className="text-xs text-slate-400">Sân {match.courtNumber}</p>
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5">
+            {match.winnerTeam === 1 && (
+              <Badge className="shrink-0 border-0 bg-emerald-500 text-xs font-semibold text-white">
+                Thắng
+              </Badge>
+            )}
+            <span className="min-w-0 truncate text-right font-semibold text-secondary">
+              {team1Name}
+            </span>
+          </div>
+
+          <div className="flex w-28 shrink-0 flex-col items-center gap-1">
+            <span className="text-xs font-medium text-slate-400">VS</span>
+            <Badge variant="outline" className={`text-xs font-semibold ${matchStatusStyle(match.status)}`}>
+              {matchStatusLabel(match.status)}
+            </Badge>
+          </div>
+
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <span className="min-w-0 truncate font-semibold text-secondary">
+              {team2Name}
+            </span>
+            {match.winnerTeam === 2 && (
+              <Badge className="shrink-0 border-0 bg-emerald-500 text-xs font-semibold text-white">
+                Thắng
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <div className="flex w-28 shrink-0 flex-col items-end gap-1">
+          {match.status === "SCHEDULED" && (
+            <span className="flex items-center gap-1 text-xs text-slate-400">
+              <Clock className="h-3 w-3 shrink-0" />
+              {new Date(match.scheduledTime).toLocaleString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          )}
+          {canViewScore && (
+            <button
+              onClick={onToggle}
+              className="cursor-pointer text-xs font-semibold text-primary transition-colors hover:text-primary/70"
+            >
+              {isActive ? "Ẩn kết quả" : "Xem kết quả"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Score panel */}
+      {isActive && (
+        <div className="border-t border-slate-100 px-6 py-4">
+          {scoresLoading ? (
+            <div className="flex justify-center gap-3">
+              <Skeleton className="h-16 w-20" />
+              <Skeleton className="h-16 w-20" />
+              <Skeleton className="h-16 w-20" />
+            </div>
+          ) : scores.length === 0 ? (
+            <p className="text-center text-xs text-slate-400">Chưa có kết quả</p>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-3">
+              {scores.map((s) => (
+                <div
+                  key={s.setNumber}
+                  className="flex min-w-[72px] flex-col items-center rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm"
+                >
+                  <span className="text-xs font-medium text-slate-400">Hiệp {s.setNumber}</span>
+                  <span className="mt-1 text-lg font-black text-secondary">
+                    {s.team1Points}
+                    <span className="mx-1 text-sm font-normal text-slate-400">-</span>
+                    {s.team2Points}
+                  </span>
+                  {s.winnerTeam != null && (
+                    <span className="mt-0.5 text-xs font-semibold text-primary">
+                      {s.winnerTeam === 1 ? "▲" : "▼"}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
