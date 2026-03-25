@@ -19,8 +19,30 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePublicEventOrderControllerFindPublicByOrderCode } from "@/lib/services/event-orders-public/event-orders-public";
+import type { OrderPublicResponseDtoPaymentStatus } from "@/lib/schemas/orderPublicResponseDtoPaymentStatus";
 
-const STATUS_CONFIG = {
+/** Extends the generated DTO with fields the API actually returns */
+interface EventOrderPublic {
+  orderCode: string;
+  lastName: string;
+  firstName: string;
+  contactName?: string;
+  finalAmount?: number;
+  paymentStatus: OrderPublicResponseDtoPaymentStatus;
+  paymentId?: string;
+  paidAt?: string;
+}
+
+type StatusKey = "PAID" | "FAILED" | "CANCELED" | "PENDING" | "REFUNDED";
+
+const STATUS_CONFIG: Record<StatusKey, {
+  icon: typeof CheckCircle2;
+  label: string;
+  color: string;
+  bg: string;
+  badgeBg: string;
+  iconColor: string;
+}> = {
   PAID: {
     icon: CheckCircle2,
     label: "Thanh toán thành công",
@@ -37,7 +59,7 @@ const STATUS_CONFIG = {
     badgeBg: "bg-red-100 text-red-700",
     iconColor: "text-red-500",
   },
-  CANCELLED: {
+  CANCELED: {
     icon: XCircle,
     label: "Đã hủy",
     color: "text-red-600",
@@ -72,7 +94,8 @@ export default function EventPaymentReturnPage() {
       query: { enabled: !!orderCode },
     });
 
-  const order = (rawData as any)?.data ?? rawData;
+  // Interceptor unwraps API envelope { status, code, data } → data
+  const order = rawData as unknown as EventOrderPublic | undefined;
 
   const handleRefresh = () => {
     refetch();
@@ -111,7 +134,7 @@ export default function EventPaymentReturnPage() {
     );
   }
 
-  const status = STATUS_CONFIG[order.paymentStatus] ?? STATUS_CONFIG.PENDING;
+  const status = STATUS_CONFIG[order.paymentStatus as StatusKey] ?? STATUS_CONFIG.PENDING;
   const StatusIcon = status.icon;
 
   return (
