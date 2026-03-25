@@ -25,10 +25,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CampaignOrderControllerCreate201,
   CampaignOrderControllerExportExcelParams,
+  CampaignOrderControllerFindAll200,
   CampaignOrderControllerFindAllParams,
-  CreateOrderDto,
-  CreateOrderResponseDto
+  CampaignOrderControllerFindOne200,
+  CampaignOrderControllerResendEmail200,
+  CreateOrderDto
 } from '../../schemas';
 
 import { defaultMutator } from '../../api/axiosInstance';
@@ -39,7 +42,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type campaignOrderControllerCreateResponse201 = {
-  data: CreateOrderResponseDto
+  data: CampaignOrderControllerCreate201
   status: 201
 }
 
@@ -116,7 +119,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getCampaignOrderControllerCreateMutationOptions(options), queryClient);
     }
     export type campaignOrderControllerFindAllResponse200 = {
-  data: void
+  data: CampaignOrderControllerFindAll200
   status: 200
 }
 
@@ -234,12 +237,12 @@ export function useCampaignOrderControllerFindAll<TData = Awaited<ReturnType<typ
 
 
 
-export type campaignOrderControllerResendEmailResponse201 = {
-  data: void
-  status: 201
+export type campaignOrderControllerResendEmailResponse200 = {
+  data: CampaignOrderControllerResendEmail200
+  status: 200
 }
 
-export type campaignOrderControllerResendEmailResponseSuccess = (campaignOrderControllerResendEmailResponse201) & {
+export type campaignOrderControllerResendEmailResponseSuccess = (campaignOrderControllerResendEmailResponse200) & {
   headers: Headers;
 };
 ;
@@ -312,7 +315,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getCampaignOrderControllerResendEmailMutationOptions(options), queryClient);
     }
     export type campaignOrderControllerFindOneResponse200 = {
-  data: void
+  data: CampaignOrderControllerFindOne200
   status: 200
 }
 
