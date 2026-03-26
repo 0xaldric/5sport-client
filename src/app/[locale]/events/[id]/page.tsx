@@ -1,6 +1,8 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useTranslations } from "next-intl";
 import { usePublicEventControllerFindOne } from "@/lib/services/public/public";
 import { useParticipantControllerFindAll } from "@/lib/services/participants/participants";
@@ -37,7 +39,8 @@ import type { EventResponseDto } from "@/lib/schemas/eventResponseDto";
 import type { Match } from "@/lib/schemas/match";
 
 type EventMedia = { id: string; type: "LOGO" | "WALLPAPER" | "EMAIL_IMAGE"; url: string };
-type EventWithMedia = EventResponseDto & { media?: EventMedia[] };
+type EventDescription = { id: string; title: string; content: string; sortOrder: number };
+type EventWithMedia = EventResponseDto & { media?: EventMedia[]; descriptions?: EventDescription[] };
 
 function formatDateTime(dateStr: string) {
   return new Date(dateStr).toLocaleString("vi-VN", {
@@ -302,6 +305,34 @@ export default function EventDetailPage({
                   )}
                 </div>
               </div>
+
+              {/* Descriptions */}
+              {event.descriptions && event.descriptions.length > 0 && (
+                <div className="space-y-6">
+                  {[...event.descriptions]
+                    .sort((a, b) => a.sortOrder - b.sortOrder)
+                    .map((desc) => (
+                      <div
+                        key={desc.id}
+                        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                      >
+                        {desc.title && (
+                          <>
+                            <h2 className="text-lg font-bold text-secondary">
+                              {desc.title}
+                            </h2>
+                            <Separator className="my-4" />
+                          </>
+                        )}
+                        <div className="prose prose-sm prose-slate max-w-none prose-headings:text-secondary prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {desc.content}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}
