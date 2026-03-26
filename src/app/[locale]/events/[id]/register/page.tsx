@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useRef } from "react";
+import { use, useState, useRef, useEffect } from "react";
 import { useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,10 @@ import {
   Building2,
   QrCode,
   Loader2,
+  UserCheck,
+  ChevronDown,
+  Trophy,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -25,10 +29,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AXIOS_INSTANCE as axiosInstance } from "@/lib/api/axiosInstance";
 import { useAuth } from "@/hooks/use-auth";
 import { signIn } from "next-auth/react";
+import { useAthleteControllerGetMyProfiles } from "@/lib/services/athletes/athletes";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface Athlete {
+interface AthleteForm {
   id: number;
   fullName: string;
   email: string;
@@ -37,6 +42,8 @@ interface Athlete {
   gender: string;
   idNumber: string;
   ticketTierId: string;
+  /** The backend athlete profile id that was selected, if any */
+  selectedProfileId?: string;
 }
 
 interface TicketTier {
@@ -104,28 +111,160 @@ function StepIndicator({ current }: { current: number }) {
   );
 }
 
+// ─── Athlete Profile Selector ────────────────────────────────────────────────
+
+function AthleteProfileSelector({
+  profiles,
+  selectedId,
+  onSelect,
+}: {
+  profiles: any[];
+  selectedId?: string;
+  onSelect: (profile: any | null) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (profiles.length === 0) return null;
+
+  const selected = profiles.find((p: any) => p.id === selectedId);
+
+  return (
+    <div className="mb-5">
+      <label className="mb-2 block text-xs font-semibold text-slate-500">
+        Chọn từ hồ sơ đã đăng ký
+      </label>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm transition-all duration-200",
+            selected
+              ? "border-primary/30 bg-primary/5"
+              : "border-dashed border-slate-300 bg-slate-50 hover:border-primary/30 hover:bg-primary/5"
+          )}
+        >
+          {selected ? (
+            <>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <UserCheck className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-secondary">{selected.name}</p>
+                <p className="truncate text-xs text-slate-500">
+                  {selected.phoneNumber || "Chưa có SĐT"} · {selected.gender === "male" ? "Nam" : selected.gender === "female" ? "Nữ" : selected.gender || "—"}
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200">
+                <User className="h-4 w-4 text-slate-400" />
+              </div>
+              <span className="text-slate-400">Chọn VĐV đã đăng ký trước đó...</span>
+            </>
+          )}
+          <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform", isOpen && "rotate-180")} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+            {/* Option to clear / enter manually */}
+            <button
+              type="button"
+              onClick={() => {
+                onSelect(null);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-slate-50",
+                !selectedId && "bg-primary/5"
+              )}
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
+                <Plus className="h-4 w-4 text-slate-500" />
+              </div>
+              <span className="font-medium text-slate-600">Nhập thông tin mới</span>
+            </button>
+
+            {profiles.map((profile: any) => (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => {
+                  onSelect(profile);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex w-full items-center gap-3 border-t border-slate-100 px-4 py-3 text-left text-sm transition-colors hover:bg-primary/5",
+                  selectedId === profile.id && "bg-primary/5"
+                )}
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <UserCheck className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-secondary">{profile.name}</p>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <span>{profile.phoneNumber || "Chưa có SĐT"}</span>
+                    {profile.currentRating > 0 && (
+                      <>
+                        <span>·</span>
+                        <span className="flex items-center gap-0.5">
+                          <Star className="h-3 w-3 text-amber-400" />
+                          {profile.currentRating}
+                        </span>
+                      </>
+                    )}
+                    {profile.totalMatches > 0 && (
+                      <>
+                        <span>·</span>
+                        <span className="flex items-center gap-0.5">
+                          <Trophy className="h-3 w-3 text-primary" />
+                          {profile.wins}W/{profile.losses}L
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {selectedId === profile.id && (
+                  <Check className="h-4 w-4 shrink-0 text-primary" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Athlete Form ─────────────────────────────────────────────────────────────
 
-function AthleteForm({
+function AthleteFormCard({
   athlete,
   index,
   tiers,
+  profiles,
   onChange,
   onRemove,
+  onSelectProfile,
   canRemove,
 }: {
-  athlete: Athlete;
+  athlete: AthleteForm;
   index: number;
   tiers: TicketTier[];
-  onChange: (field: keyof Omit<Athlete, "id">, value: string) => void;
+  profiles: any[];
+  onChange: (field: keyof Omit<AthleteForm, "id" | "selectedProfileId">, value: string) => void;
   onRemove: () => void;
+  onSelectProfile: (profile: any | null) => void;
   canRemove: boolean;
 }) {
   const inputClass =
-    "w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
+    "w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -134,6 +273,12 @@ function AthleteForm({
           <span className="font-bold text-secondary">
             Vận động viên {index + 1}
           </span>
+          {athlete.selectedProfileId && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600">
+              <UserCheck className="h-3 w-3" />
+              Đã liên kết
+            </span>
+          )}
         </div>
         {canRemove && (
           <button
@@ -144,6 +289,13 @@ function AthleteForm({
           </button>
         )}
       </div>
+
+      {/* Athlete profile selector */}
+      <AthleteProfileSelector
+        profiles={profiles}
+        selectedId={athlete.selectedProfileId}
+        onSelect={onSelectProfile}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Ticket Tier */}
@@ -271,8 +423,9 @@ export default function RegisterPage({
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [contactAutoFilled, setContactAutoFilled] = useState(false);
 
-  const [athletes, setAthletes] = useState<Athlete[]>([
+  const [athletes, setAthletes] = useState<AthleteForm[]>([
     {
       id: 1,
       fullName: "",
@@ -289,6 +442,26 @@ export default function RegisterPage({
   const { data: eventData, isLoading } = usePublicEventControllerFindOne(id);
   const event = (eventData as any)?.data ?? eventData;
 
+  // Fetch user's athlete profiles
+  const { data: profilesData } = useAthleteControllerGetMyProfiles({
+    query: { enabled: !!user },
+  });
+  const myProfiles: any[] = (profilesData as any)?.data ?? (profilesData as any) ?? [];
+
+  // Auto-fill contact info from user profile (once)
+  useEffect(() => {
+    if (user && !contactAutoFilled) {
+      if (user.displayName && !contactName) setContactName(user.displayName);
+      if (user.email && !contactEmail) setContactEmail(user.email);
+      // Try to get phone from first athlete profile
+      if (!contactPhone && myProfiles.length > 0) {
+        const firstPhone = myProfiles.find((p: any) => p.phoneNumber)?.phoneNumber;
+        if (firstPhone) setContactPhone(firstPhone);
+      }
+      setContactAutoFilled(true);
+    }
+  }, [user, myProfiles, contactAutoFilled, contactName, contactEmail, contactPhone]);
+
   // Extract ticket tiers from event sessions
   const ticketTiers: TicketTier[] =
     event?.sessions?.flatMap(
@@ -304,7 +477,7 @@ export default function RegisterPage({
     ) ?? [];
 
   // Calculate total
-  const getAthletePrice = (a: Athlete) => {
+  const getAthletePrice = (a: AthleteForm) => {
     const tier = ticketTiers.find((t) => t.id === a.ticketTierId);
     return tier?.isFree ? 0 : Number(tier?.price || 0);
   };
@@ -332,12 +505,46 @@ export default function RegisterPage({
 
   const updateAthlete = (
     athleteId: number,
-    field: keyof Omit<Athlete, "id">,
+    field: keyof Omit<AthleteForm, "id" | "selectedProfileId">,
     value: string
   ) =>
     setAthletes((prev) =>
       prev.map((a) => (a.id === athleteId ? { ...a, [field]: value } : a))
     );
+
+  const selectAthleteProfile = (athleteId: number, profile: any | null) => {
+    setAthletes((prev) =>
+      prev.map((a) => {
+        if (a.id !== athleteId) return a;
+        if (!profile) {
+          // Clear selection — reset form
+          return {
+            ...a,
+            selectedProfileId: undefined,
+            fullName: "",
+            email: "",
+            phone: "",
+            birthday: "",
+            gender: "",
+            idNumber: "",
+          };
+        }
+        // Auto-fill from profile
+        const dob = profile.dateOfBirth
+          ? profile.dateOfBirth.slice(0, 10) // "YYYY-MM-DD"
+          : "";
+        return {
+          ...a,
+          selectedProfileId: profile.id,
+          fullName: profile.name || "",
+          email: profile.user?.email || user?.email || "",
+          phone: profile.phoneNumber || "",
+          birthday: dob,
+          gender: profile.gender || "",
+        };
+      })
+    );
+  };
 
   // Validation
   const validateStep1 = () => {
@@ -499,6 +706,11 @@ export default function RegisterPage({
     );
   }
 
+  // Filter payment methods based on event config
+  const availablePaymentMethods = event?.paymentMethods?.length
+    ? PAYMENT_METHODS.filter((m) => event.paymentMethods.includes(m.id))
+    : PAYMENT_METHODS;
+
   return (
     <div className="mx-auto max-w-container px-6 py-8 lg:px-20">
       {/* Hidden form for SePay redirect */}
@@ -537,9 +749,17 @@ export default function RegisterPage({
 
             {/* Contact info */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-secondary">
-                Thông tin liên hệ
-              </h3>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-secondary">
+                  Thông tin liên hệ
+                </h3>
+                {contactAutoFilled && (contactName || contactEmail) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600">
+                    <UserCheck className="h-3 w-3" />
+                    Tự động điền từ tài khoản
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className="mb-1.5 block text-xs font-semibold text-slate-500">
@@ -550,7 +770,7 @@ export default function RegisterPage({
                     placeholder="Họ và tên người đăng ký"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
                   />
                 </div>
                 <div>
@@ -562,7 +782,7 @@ export default function RegisterPage({
                     placeholder="email@example.com"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
                   />
                 </div>
                 <div>
@@ -574,7 +794,7 @@ export default function RegisterPage({
                     placeholder="0901 234 567"
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-secondary placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
                   />
                 </div>
               </div>
@@ -582,13 +802,15 @@ export default function RegisterPage({
 
             {/* Athlete forms */}
             {athletes.map((athlete, i) => (
-              <AthleteForm
+              <AthleteFormCard
                 key={athlete.id}
                 athlete={athlete}
                 index={i}
                 tiers={ticketTiers}
+                profiles={myProfiles}
                 onChange={(field, value) => updateAthlete(athlete.id, field, value)}
                 onRemove={() => removeAthlete(athlete.id)}
+                onSelectProfile={(profile) => selectAthleteProfile(athlete.id, profile)}
                 canRemove={athletes.length > 1}
               />
             ))}
@@ -600,6 +822,20 @@ export default function RegisterPage({
               <Plus className="h-4 w-4" />
               Thêm vận động viên
             </button>
+
+            {/* Order preview */}
+            {athletes.some((a) => a.ticketTierId) && (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-6 py-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">
+                    {athletes.length} VĐV · Tạm tính
+                  </span>
+                  <span className="text-lg font-extrabold text-primary">
+                    {formatVND(subtotal)}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Terms */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -663,7 +899,7 @@ export default function RegisterPage({
                 Phương thức thanh toán
               </h3>
               <div className="space-y-3">
-                {PAYMENT_METHODS.map((method) => {
+                {availablePaymentMethods.map((method) => {
                   const Icon = method.icon;
                   const active = selectedPayment === method.id;
                   return (
